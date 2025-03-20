@@ -27,7 +27,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
             <div class="appbar-title">MagiskPatcher</div>
             <div class="spacer"></div>
             <md-text-button style="padding: 10px;" href="https://github.com/CircleCashTeam" trailing-icon>
-                Visit us on Github
+                Github
                 <svg slot="icon" viewBox="0 0 48 48">
                     <path
                         d="M9 42q-1.2 0-2.1-.9Q6 40.2 6 39V9q0-1.2.9-2.1Q7.8 6 9 6h13.95v3H9v30h30V25.05h3V39q0 1.2-.9 2.1-.9.9-2.1.9Zm10.1-10.95L17 28.9 36.9 9H25.95V6H42v16.05h-3v-10.9Z" />
@@ -93,7 +93,7 @@ https://github.com/nodeca/pako/blob/main/LICENSE
     </main>
 
     <footer>
-        <div>2025 © <a style="color: var(--md-sys-color-on-background)" href="https://github.com/CircleCashTeam">CircleCashTeam<a> ⭕💰 All rights reserved</div>
+        <div>2025 © <a style="color: var(--md-sys-color-on-background)" href="https://github.com/CircleCashTeam">CircleCashTeam<a> ⭕💰</div>
     </footer>
     <script src="/magiskboot.js"><\/script>
 `;const Yt=document.body,ni=window.matchMedia("(prefers-color-scheme: dark)");function ii(e){Yt.classList.remove("light"),Yt.classList.add("dark")}ni.matches&&ii();const Et=new yr.Terminal({fontFamily:"Iosevka, monospace",fontSize:14,letterSpacing:0,theme:{background:getComputedStyle(Yt).getPropertyValue("--md-sys-color-surface-variant").trim(),foreground:getComputedStyle(Yt).getPropertyValue("--md-sys-color-on-surface-variant").trim()},scrollOnUserInput:!0});class ht{}Ct(ht,"INFO",0),Ct(ht,"WARN",1),Ct(ht,"SUCC",2),Ct(ht,"ERRO",3),Ct(ht,"CRIT",4),Ct(ht,"DEBU",5);function se(e,n){let t="\x1B[0m",s="Normal:";switch(n){case ht.INFO:t="\x1B[94m",s="Info:";break;case ht.WARN:t="\x1B[93m",s="Warning:";break;case ht.SUCC:t="\x1B[92m",s="Success:";break;case ht.ERRO:t="\x1B[91m",s="Error:";break;case ht.CRIT:t="\x1B[95m",s="Critical:";break;case ht.DEBU:t="\x1B[96m",s="Debug:";break}Et.writeln(t+s+" "+e+"\x1B[0m"),Et.scrollToBottom()}function At(e){se(e,ht.INFO)}function Xt(e){se(e,ht.SUCC)}function mt(e){se(e,ht.ERRO)}function si(e){se(e,ht.DEBU)}const ve=new vr.FitAddon;Et.loadAddon(ve);Et.open(document.querySelector("#terminal"));ve.fit();window.addEventListener("resize",()=>{ve.fit()});function fr(e,n,t){const i="\x1B[46;96m",r="\x1B[95m",o="\x1B[96m",l="\x1B[0m",f=[" ","▏","▎","▍","▌","▋","▊","▉","█"],g=Math.min(n/e,1),_=10*g,b=Math.floor(_),k=Math.floor((_-b)*(f.length-1));let d,m,c;g===1?(d=f[f.length-1].repeat(10),m="",c=""):(d=f[f.length-1].repeat(b),m=k>=0?f[k]:"",c=f[0].repeat(Math.max(0,10-b-1)));const h=`${d}${m}${c}`,p=`${(g*100).toFixed(1)}%`.padEnd(6),w=g==1?`\x1B[92mDone!\x1B[0m
