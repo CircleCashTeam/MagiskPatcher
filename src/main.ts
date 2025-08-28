@@ -54,15 +54,15 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = /* html */`
         <div class="container">
             <div class="column card" style="flex: 2; padding: 10px; min-width:300px">
                 <md-filled-button id="up1btn">
-                    Upload Boot Image
+                    Boot イメージをアップロード
                 </md-filled-button>
                 <input style="display: none;" type="file" name="up1" id="up1" accept=".img, .bin">
                 <md-filled-tonal-button id="up2btn" >
-                    Upload Magisk Apk
+                    Magisk の Apk をアップロード
                 </md-filled-tonal-button>
                 <input style="display:none;" type="file" name="up2" id="up2" accept=".apk, .zip">
                 <md-divider></md-divider>
-                <h3>Arch</h3>
+                <h3>アーキテクチャ</h3>
                 <md-list style="background-color: transparent;">
                   <md-list-item type="button" id="list1">
                     <div slot="headline" style="user-select:none;">arm64-v8a</div>
@@ -83,11 +83,11 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = /* html */`
                 </md-list>
                 <md-divider></md-divider>
                 <md-chip-set>
-                    <md-filter-chip id="kv" label="Keep Verity" selected></md-filter-chip>
-                    <md-filter-chip id="kfe" label="Keep Force Encrypt" selected></md-filter-chip>
-                    <md-filter-chip id="rm" label="Recovery Mode"></md-filter-chip>
-                    <md-filter-chip id="pvf" label="Patch Vbmeta Flag"></md-filter-chip>
-                    <md-filter-chip id="sar" label="Legacy SAR Device"></md-filter-chip>
+                    <md-filter-chip id="kv" label="Verity を維持" selected></md-filter-chip>
+                    <md-filter-chip id="kfe" label="暗号化の強制を維持" selected></md-filter-chip>
+                    <md-filter-chip id="rm" label="リカバリーモード"></md-filter-chip>
+                    <md-filter-chip id="pvf" label="Vbmeta フラグをパッチ"></md-filter-chip>
+                    <md-filter-chip id="sar" label="従来の SAR デバイス"></md-filter-chip>
                 </md-chip-set>
                 <div class="spacer"></div>
                 <md-linear-progress id="patchprogress" style="display: none;" indeterminate></md-linear-progress>
@@ -95,7 +95,7 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = /* html */`
                     Patch
                 </md-filled-button>
                 <!--md-text-button id="downloadbtn" style="padding: 10px;" trailing-icon disabled>
-                    Click me download latest magisk apk
+                    クリックで最新の Magisk Apk をダウンロード
                     <svg slot="icon" viewBox="0 0 48 48">
                         <path
                             d="M9 42q-1.2 0-2.1-.9Q6 40.2 6 39V9q0-1.2.9-2.1Q7.8 6 9 6h13.95v3H9v30h30V25.05h3V39q0 1.2-.9 2.1-.9.9-2.1.9Zm10.1-10.95L17 28.9 36.9 9H25.95V6H42v16.05h-3v-10.9Z" />
@@ -159,27 +159,27 @@ function printlog(msg: string, type: LogType) {
   switch (type) {
     case LogType.INFO:
       color = "\x1b[94m"; // blue
-      level = "Info:";
+      level = "情報:";
       break;
     case LogType.WARN:
       color = "\x1b[93m";
-      level = "Warning:";
+      level = "警告:";
       break;
     case LogType.SUCC:
       color = "\x1b[92m";
-      level = "Success:";
+      level = "成功:";
       break;
     case LogType.ERRO:
       color = "\x1b[91m";
-      level = "Error:";
+      level = "エラー:";
       break;
     case LogType.CRIT:
       color = "\x1b[95m";
-      level = "Critical:";
+      level = "致命的:";
       break;
     case LogType.DEBU:
       color = "\x1b[96m";
-      level = "Debug:";
+      level = "デバッグ:";
       break;
     default:
       break;
@@ -272,7 +272,7 @@ let bootArray: ArrayBuffer | null = null;
 let apkArray: ArrayBuffer | null = null;
 
 document.getElementById("up1btn")!.addEventListener("click", () => {
-  logi("Upload boot image.");
+  logi("イメージをアップロード");
   document.querySelector<HTMLInputElement>("#up1")?.click();
 });
 
@@ -282,7 +282,7 @@ document
     const target = event.target as HTMLInputElement;
     const file = target.files ? target.files[0] : null;
     if (file) {
-      logi("Handle uploaded apk file...");
+      logi("アップロードした Apk ファイルのハンドル...");
       const reader = new FileReader();
 
       reader.onload = (e) => {
@@ -296,7 +296,7 @@ document
 
       reader.readAsArrayBuffer(file);
     } else {
-      logi("File not uploaded!");
+      logi("ファイルがアップロードされていません！");
     }
   });
 
@@ -306,26 +306,26 @@ document
     const target = event.target as HTMLInputElement;
     const file = target.files ? target.files[0] : null;
     if (file) {
-      logi("Handle uploaded boot image...");
+      logi("アップロードした boot イメージのハンドル...");
       const reader = new FileReader();
 
       reader.onload = (e) => {
         bootArray = e.target?.result as ArrayBuffer;
-        logs("Success upload file");
+        logs("ファイルのアップロードに成功しました");
       };
 
       reader.onerror = (e) => {
-        loge(`Read error: ${e.target?.error}`);
+        loge(`読み込みエラー: ${e.target?.error}`);
       };
 
       reader.readAsArrayBuffer(file);
     } else {
-      logi("File not uploaded!");
+      logi("ファイルがアップロードされていません！");
     }
   });
 
 document.getElementById("up2btn")!.addEventListener("click", () => {
-  logi("Upload magisk apk.");
+  logi("Magisk Apk をアップロード");
   document.querySelector<HTMLInputElement>("#up2")?.click();
 });
 
@@ -350,7 +350,7 @@ document
 
     try {
       if (!bootArray) {
-        loge("Boot image not loaded!");
+        loge("Boot イメージが読み込まれていません！");
         return;
       }
 
@@ -375,8 +375,8 @@ document
 
         const env = getFilterSelect();
 
-        console.log("Get apk data:", apkArray);
-        console.log("Get boot data:", bootArray);
+        console.log("apk データ取得:", apkArray);
+        console.log("boot データ取得:", bootArray);
         const metadata = {
           type: "start",
           arch: arch,
@@ -390,7 +390,7 @@ document
         };
         worker.postMessage(message);
       } else {
-        loge("Could not get magisk from online!");
+        loge("オンラインでの Magisk の取得ができません！");
         return;
       }
     } catch (error) {
@@ -416,7 +416,7 @@ document
           print_progress(e.data.total, e.data.value, e.data.label);
           break;
         default:
-          console.log("Recived message from worker:", e.data);
+          console.log("ワーカーからメッセージを受信:", e.data);
           break;
       }
 
@@ -437,7 +437,7 @@ document
           document.body.removeChild(a);
         }
         URL.revokeObjectURL(url);
-        logs("Download starting...");
+        logs("ダウンロードを開始中...");
       }
     };
 
@@ -454,7 +454,7 @@ async function getDownloadLink() {
   const response = await fetch(apiurl);
 
   if (!response.ok) {
-    throw new Error("Network response not ok!");
+    throw new Error("ネットワークの応答が正常ではありません！");
   }
 
   const data = await response.json();
@@ -491,7 +491,7 @@ async function getArrayBuffer(): Promise<ArrayBuffer | null> {
       method: "GET",
       responseType: "arraybuffer",
       onDownloadProgress: (e) => {
-        print_progress(totalSize, e.loaded, "Loading from online...");
+        print_progress(totalSize, e.loaded, "オンラインから読み込み中...");
       },
     });
     return resp.data; // return ArrayBuffer
@@ -572,16 +572,16 @@ async function loadApkNeeded(buffer: ArrayBuffer, arch: string): Promise<Needed 
     let magiskVer = 0;
     const ufuncs = await zip.file("assets/util_functions.sh")?.async('text');
     if (!ufuncs) {
-      loge("Could not found magisk version!");
+      loge("Magisk バージョンが見つかりません！");
       return null;
     }
 
     const matchResult = ufuncs.match(/MAGISK_VER_CODE=(\d+)/);
     if (matchResult) {
       magiskVer = Number.parseInt(matchResult[1]);
-      logi(`Get Magisk version code: ${magiskVer}`);
+      logi(`Magisk バージョンコードを取得: ${magiskVer}`);
     } else {
-      loge("Could not found magisk version from util_functions.sh!");
+      loge("util_functions.sh から Magisk バージョンが見つかりませんでした！");
       return null;
     }
 
@@ -636,12 +636,12 @@ async function loadApkNeeded(buffer: ArrayBuffer, arch: string): Promise<Needed 
     await Promise.all(promises);
 
     for (const k in ret) {
-      logi(`Loaded needed: ${k}`);
+      logi(`読み込みが必要: ${k}`);
     }
 
     return ret;
   } catch (error) {
-    loge(`Error: ${error}`);
+    loge(`エラー: ${error}`);
     return null;
   }
 }

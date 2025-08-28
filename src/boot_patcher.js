@@ -72,7 +72,7 @@ self.onmessage = async function (event) {
   }
 
   for (const k in metadata.env) {
-    logi(`Setup environment key: ${k} value: ${metadata.env[k]}`);
+    logi(`セットアップ環境キー: ${k} value: ${metadata.env[k]}`);
     setenv(k.toString(), metadata.env[k]);
   }
 
@@ -81,34 +81,34 @@ self.onmessage = async function (event) {
   Module.FS.chdir(userDir);
 
   // Write needed files!
-  logi(`Write boot image into emscripiten FS: ${userDir}/boot.img`);
+  logi(`boot イメージを emscripiten FS を書き込み: ${userDir}/boot.img`);
   Module.FS.writeFile(`${userDir}/boot.img`, new Uint8Array(bootBuffer));
   for (const need in needed) {
-    logi(`Write file into emscripten FS: ${need} -> ${userDir}/${need}`);
+    logi(`emscripten FS にファイルを書き込み: ${need} -> ${userDir}/${need}`);
     const data = new Uint8Array(needed[need]);
     Module.FS.writeFile(`${userDir}/${need}`, data);
   }
 
   let result = 0;
-  logi("- Unpacking boot image");
+  logi("- boot イメージをアンパッキング中");
   result = Module.callMain(["unpack", "boot.img"]);
   switch (result) {
     case 0:
       break;
     case 1:
-      loge("! Unsupported/Unknown image format");
+      loge("! 非対応/不明な boot イメージの形式です");
       break;
     case 2:
-      loge("! Web unsupport ChromeOS boot image");
+      loge("! ChromeOS の boot イメージはウェブに対応していません");
       break;
     default:
-      loge("! Unable to unpack boot image");
+      loge("! boot イメージを展開できません");
       break;
   }
 
   // Preinit device not impl on web yet
 
-  logi("- Checking ramdisk status");
+  logi("- ramdisk の状態を確認中");
   let STATUS = 0;
   let SKIP_BACKUP = "";
   if (isExist("ramdisk.cpio")) {
@@ -122,13 +122,13 @@ self.onmessage = async function (event) {
   let SHA1 = "";
   switch (STATUS) {
     case 0:
-      logi("- Stock boot image detected");
+      logi("- ストック boot イメージを検出しました");
       Module.callMain(["sha1", "boot.img"]);
       SHA1 = TMP; // stdout stored at TMP
       copyFile(`${userDir}/ramdisk.cpio.orig`, `${userDir}/ramdisk.cpio`);
       break;
     case 1:
-      logi("- Magisk patched boot image detected");
+      logi("- Magisk パッチ済みの boot イメージを検出しました");
       Module.callMain([
         "cpio",
         "ramdisk.cpio",
@@ -138,8 +138,8 @@ self.onmessage = async function (event) {
       copyFile(`${userDir}/ramdisk.cpio.orig`, `${userDir}/ramdisk.cpio`);
       break;
     case 2:
-      logi("! Boot image patched by unsupported programs");
-      loge("! Please restore back to stock boot image");
+      logi("! サポートされていないプログラムによってパッチされた boot イメージです");
+      loge("! ストック boot イメージに戻してください");
       break;
   }
 
@@ -152,7 +152,7 @@ self.onmessage = async function (event) {
     Module.FS.unlink("config.orig");
   }
 
-  logi("- Patching ramdisk");
+  logi("- ramdisk をパッチ中");
   let cpio_command_add = [];
   for (const f of ["magisk", "magisk32", "magisk64", "stub.apk", "init-ld"]) {
     const cf = (typeof f === 'string' && f.trim() === "stub.apk") 
@@ -160,7 +160,7 @@ self.onmessage = async function (event) {
       : `${f}.xz`;
     console.log("Try compress", f, "->", cf);
     if (isExist(f)) {
-      logi(`Compress ${f} into xz...`);
+      logi(`${f} を xz に圧縮...`);
       Module.callMain(["compress=xz", f, cf]);
       cpio_command_add.push(`add 0644 overlay.d/sbin/${cf} ${cf}`);
     }
@@ -197,11 +197,11 @@ self.onmessage = async function (event) {
   for (const dt of ["dtb", "kernel_dtb", "extra"]) {
     if (isExist(`${userDir}/${dt}`)) {
       if (Module.callMain(["dtb", dt, "test"]) != 0) {
-        logi(`! Boot image ${dt} was patched by old (unsupported) Magisk`);
-        loge("! Please try again with *unpatched* boot image");
+        logi(`! Boot イメージ ${dt} は古い Magisk (非対応) によってパッチが適用されています`);
+        loge("! *パッチ未適用* の boot イメージで再度お試しください");
       }
       if (Module.callMain(["dtb", dt, "patch"]) == 0) {
-        logi(`- Patch fstab in boot image ${dt}`);
+        logi(`- boot イメージ ${dt} の fstab にパッチを適用します`);
       }
     }
   }
@@ -261,10 +261,11 @@ self.onmessage = async function (event) {
 
   result = Module.callMain(['repack', 'boot.img']);
   if (result != 0) {
-    loge("! Unable to repack boot image");
+    loge("! boot イメージを再パックできません");
   }
 
   const data = Module.FS.readFile(`${userDir}/new-boot.img`);
 
   this.postMessage({ type: "done", data: data});
 };
+
