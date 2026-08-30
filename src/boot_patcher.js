@@ -1,6 +1,12 @@
 // boot_patcher.js
 // Web Worker
-importScripts("/MagiskPatcher/magiskboot.js");
+const magiskbootModulePromise = (async () => {
+  const magiskbootScript = await fetch(new URL('./magiskboot.js', import.meta.url)).then((res) => res.text());
+  const magiskbootBlob = new Blob([magiskbootScript], { type: "application/javascript" });
+  const magiskbootUrl = URL.createObjectURL(magiskbootBlob);
+  const { default: magiskboot } = await import(/* @vite-ignore */ magiskbootUrl);
+  return magiskboot;
+})();
 
 function logi(msg) {
   self.postMessage({ type: "response", data: msg });
@@ -19,6 +25,8 @@ self.onmessage = async function (event) {
 
   console.log("Worker with options:", metadata);
 
+  const magiskboot = await magiskbootModulePromise;
+
   let TMP = "";
   // 创建 magiskboot 实例
   const Module = await magiskboot({
@@ -31,7 +39,7 @@ self.onmessage = async function (event) {
       TMP = msg.trim();
     },
     printErr: (msg) => cprint(msg),
-    locateFile: (file) => "/MagiskPatcher/magiskboot.wasm",
+    locateFile: (file) => new URL(`./${file}`, import.meta.url).href,
   });
 
   function setenv(key, value) {
@@ -90,6 +98,7 @@ self.onmessage = async function (event) {
   }
 
   let result = 0;
+  let VENDORBOOT = false;
   logi("- Unpacking boot image");
   result = Module.callMain(["unpack", "boot.img"]);
   switch (result) {
@@ -101,20 +110,32 @@ self.onmessage = async function (event) {
     case 2:
       loge("! Web unsupport ChromeOS boot image");
       break;
+    case 3:
+      VENDORBOOT = true;
+      logi("- Vendor boot image detected");
+      break;
     default:
       loge("! Unable to unpack boot image");
       break;
   }
 
   // Preinit device not impl on web yet
+  let RAMDISK = "";
+  for (const path of ["ramdisk.cpio", "vendor_ramdisk/init_boot.cpio", "vendor_ramdisk/ramdisk.cpio"]) {
+    if (isExist(path)) {
+      RAMDISK = path;
+      break;
+    }
+  }
 
   logi("- Checking ramdisk status");
   let STATUS = 0;
   let SKIP_BACKUP = "";
-  if (isExist("ramdisk.cpio")) {
-    STATUS = Module.callMain(["cpio", "ramdisk.cpio", "test"]);
+  if (RAMDISK) {
+    STATUS = Module.callMain(["cpio", RAMDISK, "test"]);
     SKIP_BACKUP = "";
   } else {
+    RAMDISK = "ramdisk.cpio";
     STATUS = 0;
     SKIP_BACKUP = "#";
   }
@@ -125,17 +146,17 @@ self.onmessage = async function (event) {
       logi("- Stock boot image detected");
       Module.callMain(["sha1", "boot.img"]);
       SHA1 = TMP; // stdout stored at TMP
-      copyFile(`${userDir}/ramdisk.cpio.orig`, `${userDir}/ramdisk.cpio`);
+      copyFile(`${userDir}/ramdisk.cpio.orig`, `${userDir}/${RAMDISK}`);
       break;
     case 1:
       logi("- Magisk patched boot image detected");
       Module.callMain([
         "cpio",
-        "ramdisk.cpio",
+        RAMDISK,
         "extract .backup/.magisk config.orig",
         "restore",
       ]);
-      copyFile(`${userDir}/ramdisk.cpio.orig`, `${userDir}/ramdisk.cpio`);
+      copyFile(`${userDir}/ramdisk.cpio.orig`, `${userDir}/${RAMDISK}`);
       break;
     case 2:
       logi("! Boot image patched by unsupported programs");
@@ -172,6 +193,7 @@ self.onmessage = async function (event) {
   config += `KEEPVERITY=${metadata.env.KEEPVERITY}\n`;
   config += `KEEPFORCEENCRYPT=${metadata.env.KEEPFORCEENCRYPT}\n`;
   config += `RECOVERYMODE=${metadata.env.RECOVERYMODE}\n`;
+  config += `VENDORBOOT=${(metadata.env.VENDORBOOT === 'true' || VENDORBOOT) ? 'true' : 'false'}\n`;
   if (SHA1.length != 0) {
     config += `SHA1=${SHA1}\n`;
   }
@@ -180,7 +202,7 @@ self.onmessage = async function (event) {
 
   result = Module.callMain([
     "cpio",
-    "ramdisk.cpio",
+    RAMDISK,
     "add 0750 init magiskinit",
     "mkdir 0750 overlay.d",
     "mkdir 0750 overlay.d/sbin",

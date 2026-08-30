@@ -10,11 +10,10 @@ import "@xterm/xterm/css/xterm.css";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import { MdFilledButton, MdFilterChip, MdListItem, MdRadio } from "@material/web/all.js";
-import axios from "axios";
 import JSZip from "jszip";
 
 // @ts-ignore
-const __version__ = "0.1.4";
+const __version__ = "0.1.5";
 // @ts-ignore
 const __author__ = "affggh";
 
@@ -109,7 +108,7 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = /* html */`
     <footer>
         <div>2025 © <a style="color: var(--md-sys-color-on-background)" href="https://github.com/CircleCashTeam">CircleCashTeam<a> ⭕💰</div>
     </footer>
-    <script src="/magiskboot.js"></script>
+    <script type="module" src="/src/magiskboot.js"></script>
 `;
 
 const body = document.body;
@@ -346,7 +345,7 @@ document.querySelector<MdListItem>("#list3")!.addEventListener("click", () => {
 document
   .querySelector<MdFilledButton>("#testbtn")!
   .addEventListener("click", async () => {
-    const worker = new Worker(new URL("./boot_patcher.js", import.meta.url));
+    const worker = new Worker(new URL("./boot_patcher.js", import.meta.url), { type: "module" });
 
     try {
       if (!bootArray) {
@@ -358,7 +357,8 @@ document
       const architectures = ["arm64-v8a", "armeabi-v7a", "x86_64", "x86"];
 
       if (!apkArray) {
-        apkArray = await getArrayBuffer();
+        loge("Magisk APK not loaded! Please upload a Magisk APK first.");
+        return;
       }
 
       for (const l of architectures) {
@@ -390,7 +390,7 @@ document
         };
         worker.postMessage(message);
       } else {
-        loge("Could not get magisk from online!");
+        loge("Magisk APK not loaded! Please upload a Magisk APK first.");
         return;
       }
     } catch (error) {
@@ -447,67 +447,6 @@ document
     };
   });
 
-async function getDownloadLink() {
-  const apiurl =
-    "https://api.github.com/repos/topjohnwu/Magisk/releases/latest";
-  const crosProxy = "https://api.codetabs.com/v1/proxy?quest="; // cros proxy
-  const response = await fetch(apiurl);
-
-  if (!response.ok) {
-    throw new Error("Network response not ok!");
-  }
-
-  const data = await response.json();
-  const assets = data.assets;
-
-  let downloadLink = "";
-  let totalSize = 0;
-  assets.forEach(
-    (asset: { name: string; browser_download_url: string; size: number }) => {
-      if (asset.name.startsWith("Magisk") && asset.name.endsWith(".apk")) {
-        downloadLink = asset.browser_download_url;
-        totalSize = asset.size;
-      }
-    }
-  );
-  if (downloadLink == "") {
-    return { downloadLink, totalSize };
-  }
-
-  return { downloadLink: crosProxy + downloadLink, totalSize };
-}
-
-async function getArrayBuffer(): Promise<ArrayBuffer | null> {
-  try {
-    const { downloadLink, totalSize } = await getDownloadLink();
-    if (downloadLink == "") {
-      loge("Could not get download url");
-      return null;
-    } else {
-      logd(`Get download url: ${downloadLink}`);
-    }
-    const resp = await axios({
-      url: downloadLink,
-      method: "GET",
-      responseType: "arraybuffer",
-      onDownloadProgress: (e) => {
-        print_progress(totalSize, e.loaded, "Loading from online...");
-      },
-    });
-    return resp.data; // return ArrayBuffer
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      loge(`Axios error: ${error.message}`);
-      if (error.response) {
-        loge(`Response status: ${error.response.status}`);
-        loge(`Response data: ${error.response.data}`);
-      }
-    } else {
-      loge(`Unknown error: ${error}`);
-    }
-    return null;
-  }
-}
 
 type FilterKeys = 'KEEPVERITY' | 'KEEPFORCEENCRYPT' | 'PATCHVBMETAFLAG' | 'RECOVERYMODE' | 'LEGACYSAR';
 
